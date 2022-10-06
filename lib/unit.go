@@ -10,9 +10,9 @@ type Unit struct {
 	Died    bool   `json:"dies"`
 }
 
-func (u Unit) Self() bool     { return u.Player == "0" }
+func (u Unit) Self() bool     { return u.Type != "" }
 func (u Unit) Leader() bool   { return u.Id == 1 || u.Id == 2 }
-func (u Unit) String() string { return fmt.Sprintf("%s | %t | %t", u.Type, u.Spawned, u.Died) }
+func (u Unit) String() string { return fmt.Sprintf("%3s | %6t | %t", u.Type, u.Spawned, u.Died) }
 
 type Units []Unit
 

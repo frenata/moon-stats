@@ -2,7 +2,6 @@ package lib
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -28,8 +27,8 @@ func ReadLog(name string) []Game {
 
 	scanner := bufio.NewScanner(file)
 
-	name_match, _ := regexp.Compile(`user_id ([a-z0-9\-]+) and display name (\w+),`)
-	game_match, _ := regexp.Compile(`game_id ([a-z0-9\-]+),`)
+	name_match, _ := regexp.Compile(`user_id ([a-z0-9\-]{36}) and display name (\w+),`)
+	game_match, _ := regexp.Compile(`game_id ([a-z0-9\-]{36})`)
 
 	var world, display_name, game_id, user_id string
 	groups := make([]lineGroup, 0)
@@ -47,7 +46,10 @@ func ReadLog(name string) []Game {
 				groups = append(groups, lineGroup{lines: lines, game_id: game_id, world: world})
 			}
 			lines = make([]string, 0)
-			game_id = game_match.FindStringSubmatch(line)[1]
+			matches := game_match.FindStringSubmatch(line)
+			if len(matches) > 1 {
+				game_id = matches[1]
+			}
 		}
 
 		if strings.Contains(line, "Loading '") {
@@ -91,7 +93,7 @@ func CategorizeLines(lines []string) []Unit {
 		events[n] = append(events[n], line)
 	}
 
-	fmt.Println(events)
+	// fmt.Println(events)
 	units := make([]Unit, 0)
 
 	for n, v := range events {

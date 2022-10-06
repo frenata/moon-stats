@@ -84,9 +84,11 @@ func (app *App) upsertGame(player_id, game_id uuid.UUID, victory bool, units []l
 		log.Fatal("prep insert unit ", err)
 	}
 	for _, unit := range units {
-		_, err = stmt.Exec(game_id, player_id, unit.Id, unit.Type, unit.Spawned, unit.Died)
-		if err != nil {
-			log.Fatal("insert unit ", err)
+		if unit.Type != "" {
+			_, err = stmt.Exec(game_id, player_id, unit.Id, unit.Type, unit.Spawned, unit.Died)
+			if err != nil {
+				log.Fatal("insert unit ", err)
+			}
 		}
 	}
 	tx.Commit()

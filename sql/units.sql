@@ -15,3 +15,5 @@ insert or ignore into units (id, name, type)
 values (132, 'Blindsider Eztli', 'melee');
 insert or ignore into units (id, name, type)
 values (4, 'Crankbait', 'melee');
+insert or ignore into units (id, name, type)
+values (118, 'Sleeper Mine', 'summon');
