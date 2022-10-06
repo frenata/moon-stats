@@ -43,15 +43,15 @@ func ReadLog(name string) []Game {
 		}
 
 		if strings.Contains(line, "game_id") {
+			if len(lines) > 0 {
+				groups = append(groups, lineGroup{lines: lines, game_id: game_id, world: world})
+			}
+			lines = make([]string, 0)
 			game_id = game_match.FindStringSubmatch(line)[1]
 		}
 
 		if strings.Contains(line, "Loading '") {
 			world = strings.Trim(strings.Split(strings.TrimPrefix(line, "Loading '"), "/")[1], "'")
-			if len(lines) > 0 {
-				groups = append(groups, lineGroup{lines: lines, game_id: game_id, world: world})
-			}
-			lines = make([]string, 0)
 		}
 
 		if strings.Contains(line, "Unit ") {
