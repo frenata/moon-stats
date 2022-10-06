@@ -13,7 +13,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func ReadLog(name string) Game {
+type lineGroup struct {
+	lines   []string
+	game_id string
+	world   string
+}
+
+func ReadLog(name string) []Game {
 	file, err := os.Open(name)
 	if err != nil {
 		log.Fatal(err)
@@ -26,6 +32,7 @@ func ReadLog(name string) Game {
 	game_match, _ := regexp.Compile(`game_id ([a-z0-9\-]+),`)
 
 	var world, display_name, game_id, user_id string
+	groups := make([]lineGroup, 0)
 	lines := make([]string, 0)
 
 	for scanner.Scan() {
@@ -35,21 +42,38 @@ func ReadLog(name string) Game {
 			display_name = name_match.FindStringSubmatch(line)[2]
 		}
 
-		if strings.Contains(line, "Unit ") {
-			lines = append(lines, line)
+		if strings.Contains(line, "game_id") {
+			game_id = game_match.FindStringSubmatch(line)[1]
 		}
 
 		if strings.Contains(line, "Loading '") {
 			world = strings.Trim(strings.Split(strings.TrimPrefix(line, "Loading '"), "/")[1], "'")
+			if len(lines) > 0 {
+				groups = append(groups, lineGroup{lines: lines, game_id: game_id, world: world})
+			}
+			lines = make([]string, 0)
 		}
 
-		if strings.Contains(line, "game_id") {
-			game_id = game_match.FindStringSubmatch(line)[1]
+		if strings.Contains(line, "Unit ") {
+			lines = append(lines, line)
 		}
 	}
 
+	if len(lines) > 0 {
+		groups = append(groups, lineGroup{lines: lines, game_id: game_id, world: world})
+	}
+
 	player := Player{Id: uuid.MustParse(user_id), Name: display_name}
-	return Game{Id: uuid.MustParse(game_id), World: world, Player: player, Units: CategorizeLines(lines)}
+	games := make([]Game, 0)
+
+	for _, group := range groups {
+		games = append(games,
+			Game{Id: uuid.MustParse(group.game_id),
+				World:  group.world,
+				Player: player,
+				Units:  CategorizeLines(group.lines)})
+	}
+	return games
 }
 
 func CategorizeLines(lines []string) []Unit {
